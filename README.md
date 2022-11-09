@@ -39,3 +39,7 @@ Ensuite 2 lignes position de la tonseuse :
 X Y Orientation
 Instructions
 
+Example :
+5 5
+1 2 N
+GAGAGAGAA
