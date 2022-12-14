@@ -9,8 +9,7 @@ object Parser {
     val buffer = new BufferedReader(new FileReader(path))
     Using(buffer) { reader =>
       val line: String = reader.readLine()
-      list = list + line.toList
     }
     list
-  } 
+  }
 }
