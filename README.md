@@ -1,5 +1,7 @@
 # Projet AL
 
+[![Workflow](https://github.com/SwannHERRERA/tondeuse-scala/actions/workflows/main.yml/badge.svg)](https://github.com/SwannHERRERA/tondeuse-scala/actions/workflows/main.yml)
+
 ## Pré-requis
 
 Il est indispensable d'avoir installé en local:
