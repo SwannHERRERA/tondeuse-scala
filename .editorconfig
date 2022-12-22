@@ -1,0 +1,21 @@
+# This is the top-most .editorconfig file
+root = true
+
+# Sets the charset to UTF-8
+[*]
+charset = utf-8
+
+# Indentation settings
+[*.scala]
+indent_style = space
+indent_size = 2
+
+# Line ending settings
+[*.scala]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Other settings
+[*.scala]
+max_line_length = 120
