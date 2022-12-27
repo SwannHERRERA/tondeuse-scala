@@ -18,12 +18,12 @@ class LawnMowerService(lawn: Lawn, instructions: List[Instruction]) {
   def run: (Orientation, Position) =
     instructions.foldLeft((lawn.initialOrientation, lawn.initialPosition)) {
       case ((orientation, position), instruction) =>
-        val (newOrientation, newPosition) = instruction.move(orientation)
+        val (newOrientation, positionMove) = instruction.move(orientation)
+        val newPosition = Position(position.x + positionMove.x, position.y + positionMove.y)
         if (lawn.isInside(newPosition)) (newOrientation, newPosition)
         else (orientation, position)
     }
 }
-
 
 object LawnMowerService {
   def apply(lawn: Lawn, instructions: List[Instruction]): LawnMowerService =

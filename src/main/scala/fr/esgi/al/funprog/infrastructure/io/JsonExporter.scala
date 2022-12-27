@@ -7,11 +7,11 @@ import scala.collection.immutable.ListMap
 
 sealed trait JsonValue {
   def indentString(indent: Int): String = "\t" * indent
-  def toJson(indent: Int = 0): String
+  def toJson(indent: Int): String
 }
 
 case class JsonObject(fields: Map[String, JsonValue]) extends JsonValue {
-  override def toJson(indent: Int = 0): String = {
+  override def toJson(indent: Int): String = {
     fields
       .map {
         case (key, value) =>
@@ -25,8 +25,8 @@ case class JsonObject(fields: Map[String, JsonValue]) extends JsonValue {
   }
 }
 
-case class JsonArray(values: List[JsonValue]) extends JsonValue {
-  override def toJson(indent: Int = 0): String = {
+case class JsonArray(values: List[JsonPrimitive]) extends JsonValue {
+  override def toJson(indent: Int): String = {
     values
       .map(_.toJson(indent + 1))
       .mkString(
@@ -37,14 +37,28 @@ case class JsonArray(values: List[JsonValue]) extends JsonValue {
   }
 }
 
-case class JsonString(value: String) extends JsonValue {
-  override def toJson(indent: Int = 0): String = {
+case class JsonObjectArray(values: List[JsonObject]) extends JsonValue {
+  override def toJson(indent: Int): String = {
+    values
+      .map(_.toJson(indent + 1))
+      .mkString(
+        "[\n" + indentString(indent + 1),
+        ",\n" + indentString(indent + 1),
+        "\n" + indentString(indent) + "]"
+      )
+  }
+}
+
+trait JsonPrimitive extends JsonValue
+
+case class JsonString(value: String) extends JsonPrimitive {
+  override def toJson(indent: Int): String = {
     s""""$value""""
   }
 }
 
-case class JsonNumber(value: Int) extends JsonValue {
-  override def toJson(indent: Int = 0): String = {
+case class JsonNumber(value: Int) extends JsonPrimitive {
+  override def toJson(indent: Int): String = {
     value.toString
   }
 }
@@ -54,29 +68,53 @@ class JsonExporter extends FunProgLawnExporter {
       funProgLawn: FunProgLawn
   ): String =
     JsonObject(
-      ListMap(
+      ListMap[String, JsonValue](
         "limite" -> JsonObject(
           ListMap(
             "x" -> JsonNumber(funProgLawn.upperRight.x),
             "y" -> JsonNumber(funProgLawn.upperRight.y)
           )
         ),
-        "tondeuses" -> JsonArray(
+        "tondeuses" -> JsonObjectArray(
           funProgLawn.lawnMowers.map { lawnMower =>
             JsonObject(
-              ListMap(
-                "position" -> JsonObject(
-                  ListMap(
-                    "x" -> JsonNumber(lawnMower.lawn.initialPosition.x),
-                    "y" -> JsonNumber(lawnMower.lawn.initialPosition.y)
+              ListMap[String, JsonValue](
+                "debut" -> JsonObject(
+                  ListMap[String, JsonValue](
+                    "point" -> JsonObject(
+                      ListMap(
+                        "x" -> JsonNumber(lawnMower.lawn.initialPosition.x),
+                        "y" -> JsonNumber(lawnMower.lawn.initialPosition.y)
+                      )
+                    ),
+                    "direction" -> JsonString(
+                      lawnMower.lawn.initialOrientation.toString
+                    )
                   )
                 ),
-                "orientation"  -> JsonString(lawnMower.lawn.initialOrientation.toString),
-                "instructions" -> JsonArray() // suite ...
+                "instructions" -> JsonArray(
+                  lawnMower.instructions.map { instruction =>
+                    JsonString(instruction.toString)
+                  }
+                ),
+                "fin" -> {
+                  val (finalOrientation, finalPosition) = lawnMower.run
+                  JsonObject(
+                    ListMap[String, JsonValue](
+                      "point" -> JsonObject(
+                        ListMap(
+                          "x" -> JsonNumber(finalPosition.x),
+                          "y" -> JsonNumber(finalPosition.y)
+                        )
+                      ),
+                      "direction" -> JsonString(finalOrientation.toString)
+                    )
+                  )
+                }
               )
             )
           }
         )
       )
-    ).toJson()
+    ).toJson(0)
 }

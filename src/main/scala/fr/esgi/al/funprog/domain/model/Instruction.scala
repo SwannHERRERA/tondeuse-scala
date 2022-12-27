@@ -29,10 +29,8 @@ case object Forward extends Instruction {
 
 object Instruction {
   def apply(instruction: String): Instruction = instruction match {
-    case 'D' => TurnRight
-    case 'G' => TurnLeft
-    case 'A' => Forward
-    case _ =>
-      throw new IllegalArgumentException(s"Unknown instruction: $instruction")
+    case "D" => TurnRight
+    case "G" => TurnLeft
+    case "A" => Forward
   }
 }
