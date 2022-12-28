@@ -6,7 +6,7 @@ import fr.esgi.al.funprog.domain.io.{FunProgLawnExporter, Writer}
 import scala.collection.immutable.ListMap
 
 sealed trait JsonValue {
-  def indentString(indent: Int): String = "\t" * indent
+  def indentString(indent: Int): String = "  " * indent
   def toJson(indent: Int): String
 }
 
