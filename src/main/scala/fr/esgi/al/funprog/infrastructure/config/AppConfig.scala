@@ -24,7 +24,7 @@ case class AppConfig(
 ) {
 
   /**
-   * Constructs a new AppConfig case class from a Config object.
+   * Constructs a new [[AppConfig]] case class from a Config object.
    *
    * @param config the Config object containing the configuration values
    */
@@ -42,16 +42,16 @@ case class AppConfig(
 }
 
 /**
- * Object for loading and storing application configuration values.
+ * Companion object for loading and storing application configuration values.
  */
 object AppConfig {
   private val config = ConfigFactory.load()
 
   /**
    * Loads the configuration values from the application.conf file
-   * and returns them as an AppConfig case class.
+   * and returns them as an [[AppConfig]] case class.
    *
-   * @return the configuration values as an AppConfig case class
+   * @return the configuration values as an [[AppConfig]] case class
    */
   def apply(): AppConfig = new AppConfig(config)
 }

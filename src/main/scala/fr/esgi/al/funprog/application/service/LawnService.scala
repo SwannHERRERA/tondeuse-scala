@@ -16,13 +16,12 @@ case class LawnService(
    * Initializes the lawnmowers and places them on the lawn according to their
    * initial positions.
    */
-  def initMowers: List[LawnMower] =
+  def initLawnMowers: List[LawnMower] =
     lawns.zip(instructions).map { case (lawn, inst) => LawnMower(lawn, inst) }
 
 }
 
 object LawnService {
-
   def apply(
       upperRight: Position,
       lawns: List[Lawn],

@@ -13,7 +13,7 @@ class LawnMowerService(lawn: Lawn, instructions: List[Instruction]) {
    * Executes the instructions sent to the lawnmower and updates its position
    * accordingly.
    *
-   * @return the final orientation and position of the lawnmower
+   * @return the final [[Orientation]] and [[Position]] of the lawnmower
    */
   def run: (Orientation, Position) =
     instructions.foldLeft((lawn.initialOrientation, lawn.initialPosition)) {
