@@ -1,7 +1,7 @@
 package fr.esgi.al.funprog.infrastructure.io
 
 import fr.esgi.al.funprog.application.model.FunProgLawn
-import fr.esgi.al.funprog.domain.io.FunProgLawnExporter
+import fr.esgi.al.funprog.domain.io.{FunProgLawnExporter, Writer}
 
 import scala.collection.immutable.ListMap
 
@@ -63,58 +63,64 @@ case class JsonNumber(value: Int) extends JsonPrimitive {
   }
 }
 
-class JsonExporter extends FunProgLawnExporter {
+class JsonExporter(writer: Writer) extends FunProgLawnExporter {
   override def export(
       funProgLawn: FunProgLawn
-  ): String =
-    JsonObject(
-      ListMap[String, JsonValue](
-        "limite" -> JsonObject(
-          ListMap(
-            "x" -> JsonNumber(funProgLawn.upperRight.x),
-            "y" -> JsonNumber(funProgLawn.upperRight.y)
-          )
-        ),
-        "tondeuses" -> JsonObjectArray(
-          funProgLawn.lawnMowers.map { lawnMower =>
-            JsonObject(
-              ListMap[String, JsonValue](
-                "debut" -> JsonObject(
-                  ListMap[String, JsonValue](
-                    "point" -> JsonObject(
-                      ListMap(
-                        "x" -> JsonNumber(lawnMower.lawn.initialPosition.x),
-                        "y" -> JsonNumber(lawnMower.lawn.initialPosition.y)
-                      )
-                    ),
-                    "direction" -> JsonString(
-                      lawnMower.lawn.initialOrientation.toString
-                    )
-                  )
-                ),
-                "instructions" -> JsonArray(
-                  lawnMower.instructions.map { instruction =>
-                    JsonString(instruction.toString)
-                  }
-                ),
-                "fin" -> {
-                  val (finalOrientation, finalPosition) = lawnMower.run
-                  JsonObject(
+  ): Unit =
+    writer.write(
+      JsonObject(
+        ListMap[String, JsonValue](
+          "limite" -> JsonObject(
+            ListMap(
+              "x" -> JsonNumber(funProgLawn.upperRight.x),
+              "y" -> JsonNumber(funProgLawn.upperRight.y)
+            )
+          ),
+          "tondeuses" -> JsonObjectArray(
+            funProgLawn.lawnMowers.map { lawnMower =>
+              JsonObject(
+                ListMap[String, JsonValue](
+                  "debut" -> JsonObject(
                     ListMap[String, JsonValue](
                       "point" -> JsonObject(
                         ListMap(
-                          "x" -> JsonNumber(finalPosition.x),
-                          "y" -> JsonNumber(finalPosition.y)
+                          "x" -> JsonNumber(lawnMower.lawn.initialPosition.x),
+                          "y" -> JsonNumber(lawnMower.lawn.initialPosition.y)
                         )
                       ),
-                      "direction" -> JsonString(finalOrientation.toString)
+                      "direction" -> JsonString(
+                        lawnMower.lawn.initialOrientation.toString
+                      )
                     )
-                  )
-                }
+                  ),
+                  "instructions" -> JsonArray(
+                    lawnMower.instructions.map { instruction =>
+                      JsonString(instruction.toString)
+                    }
+                  ),
+                  "fin" -> {
+                    val (finalOrientation, finalPosition) = lawnMower.run
+                    JsonObject(
+                      ListMap[String, JsonValue](
+                        "point" -> JsonObject(
+                          ListMap(
+                            "x" -> JsonNumber(finalPosition.x),
+                            "y" -> JsonNumber(finalPosition.y)
+                          )
+                        ),
+                        "direction" -> JsonString(finalOrientation.toString)
+                      )
+                    )
+                  }
+                )
               )
-            )
-          }
+            }
+          )
         )
-      )
-    ).toJson(0)
+      ).toJson(0)
+    )
+}
+
+object JsonExporter {
+  def apply(writer: Writer): JsonExporter = new JsonExporter(writer)
 }

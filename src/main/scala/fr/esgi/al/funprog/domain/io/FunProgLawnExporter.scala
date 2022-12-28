@@ -10,5 +10,5 @@ trait FunProgLawnExporter {
 
   def export(
       funProgLawn: FunProgLawn
-  ): String
+  ): Unit
 }

@@ -1,15 +1,14 @@
 package fr.esgi.al.funprog
 
-import fr.esgi.al.funprog.application.model.{FunProgLawn, Lawn, LawnMower}
-import fr.esgi.al.funprog.domain.io.FunProgLawnExporter
-import fr.esgi.al.funprog.domain.model._
-import fr.esgi.al.funprog.infrastructure.io.JsonExporter
+import fr.esgi.al.funprog.infrastructure.config.AppConfig
+import fr.esgi.al.funprog.interfaces.cli.Cli
 
 object Main extends App {
-  println("Ici le programme principal")
-  println("Hello World")
+  val cli = Cli(AppConfig())
 
-  private val upperRight = Position(5, 5)
+  cli.run()
+
+  /* private val upperRight = Position(5, 5)
   private val lawn1 = Lawn(upperRight, North, Position(1, 2))
   private val lawn1Instructions = List[Instruction](
     TurnLeft,
@@ -42,5 +41,5 @@ object Main extends App {
 
   private val exporter: FunProgLawnExporter = new JsonExporter()
 
-  println(exporter.export(funProgLawn))
+  println(exporter.export(funProgLawn))*/
 }

@@ -34,3 +34,13 @@ case object West extends Orientation {
   override def forward: Position = Position(-1, 0)
   override def toString: String = "W"
 }
+
+object Orientation {
+  def apply(orientation: String): Orientation = orientation match {
+    case "N" => North
+    case "E" => East
+    case "S" => South
+    case "W" => West
+    case _   => ??? // throw new IllegalArgumentException("Orientation inconnue")
+  }
+}
