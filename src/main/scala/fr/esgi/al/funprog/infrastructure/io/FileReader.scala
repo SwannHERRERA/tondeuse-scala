@@ -6,7 +6,7 @@ import fr.esgi.al.funprog.domain.io.Reader
 /**
  * Utility class for reading a file and returning its content as a string.
  */
-case class FileReader(filePath: String) extends Reader {
+class FileReader(filePath: String) extends Reader {
 
   /**
    * Reads the specified file and returns its content as a string.
@@ -25,4 +25,8 @@ case class FileReader(filePath: String) extends Reader {
   override def readLines: List[String] = {
     File(filePath).lines.toList
   }
+}
+
+object FileReader {
+  def apply(filePath: String): FileReader = new FileReader(filePath)
 }
