@@ -11,7 +11,7 @@ case class Cli(appConfig: AppConfig) {
 
   private def getReader(config: AppConfig): Reader = config.inputMode match {
     case "file"    => FileReader(config.inputFile)
-    case "console" => ???
+    case "console" => ConsoleReader()
     case _         => ??? //throw DonneesIncorectesException("Invalid input mode")
   }
 
@@ -19,7 +19,7 @@ case class Cli(appConfig: AppConfig) {
     config.outputMode match {
       case "file"    => FileWriter(config.outputJsonFile)
       case "console" => ConsoleWriter()
-      case "both"    => ???
+      case "both"    => BothWriter(config.outputJsonFile)
       case _         => ??? //throw DonneesIncorectesException("Invalid output mode")
     }
 
@@ -27,7 +27,7 @@ case class Cli(appConfig: AppConfig) {
     config.outputMode match {
       case "file"    => FileWriter(config.outputYamlFile)
       case "console" => ConsoleWriter()
-      case "both"    => ???
+      case "both"    => BothWriter(config.outputYamlFile)
       case _         => ??? //throw DonneesIncorectesException("Invalid output mode")
     }
 
@@ -35,7 +35,7 @@ case class Cli(appConfig: AppConfig) {
     config.outputMode match {
       case "file"    => FileWriter(config.outputCsvFile)
       case "console" => ConsoleWriter()
-      case "both"    => ???
+      case "both"    => BothWriter(config.outputCsvFile)
       case _         => ??? //throw DonneesIncorectesException("Invalid output mode")
     }
   def run(): Unit = {
