@@ -13,7 +13,7 @@ case class FileReader(filePath: String) extends Reader {
    *
    * @return the content of the file as a string
    */
-  def readAll: String = {
+  override def readAll: String = {
     File(filePath).contentAsString
   }
 
@@ -22,7 +22,7 @@ case class FileReader(filePath: String) extends Reader {
    *
    * @return a list of strings, one for each line in the file
    */
-  def readLines: List[String] = {
+  override def readLines: List[String] = {
     File(filePath).lines.toList
   }
 }
