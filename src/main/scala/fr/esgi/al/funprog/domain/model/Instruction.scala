@@ -45,6 +45,16 @@ case object Forward extends Instruction {
 }
 
 /**
+ * The [[OrientationNone]] case object extends the [[Instruction]] trait and represents the instruction to do nothing.
+ */
+case object InstructionNone extends Instruction {
+  override def move: (Orientation) => (Orientation, Position) =
+    (orientation: Orientation) => (orientation, Position(0, 0))
+
+  override def toString: String = ""
+}
+
+/**
  * The [[Instruction]] companion object contains a method to parse a string into an [[Instruction]].
  */
 object Instruction {
@@ -52,6 +62,6 @@ object Instruction {
     case 'D' => TurnRight
     case 'G' => TurnLeft
     case 'A' => Forward
-    case _   => println("Ooops, unknown instruction"); Forward
+    case _   => println("Ooops, unknown instruction"); InstructionNone
   }
 }

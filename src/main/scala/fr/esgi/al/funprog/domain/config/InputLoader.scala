@@ -5,6 +5,7 @@ import fr.esgi.al.funprog.application.model.Lawn
 import fr.esgi.al.funprog.domain.model.{Instruction, Position}
 
 trait InputLoader {
+
   /**
    * Loads the input data (lawn coordinates and lawnmower instructions) from
    * a file or a database.

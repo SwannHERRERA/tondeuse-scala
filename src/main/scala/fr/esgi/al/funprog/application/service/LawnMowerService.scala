@@ -19,7 +19,8 @@ class LawnMowerService(lawn: Lawn, instructions: List[Instruction]) {
     instructions.foldLeft((lawn.initialOrientation, lawn.initialPosition)) {
       case ((orientation, position), instruction) =>
         val (newOrientation, positionMove) = instruction.move(orientation)
-        val newPosition = Position(position.x + positionMove.x, position.y + positionMove.y)
+        val newPosition =
+          Position(position.x + positionMove.x, position.y + positionMove.y)
         if (lawn.isInside(newPosition)) (newOrientation, newPosition)
         else (orientation, position)
     }

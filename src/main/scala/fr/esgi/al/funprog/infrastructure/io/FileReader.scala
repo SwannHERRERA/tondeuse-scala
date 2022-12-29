@@ -31,6 +31,7 @@ class FileReader(filePath: String) extends Reader {
  * An object that creates a new [[FileReader]] instance with the given file path.
  */
 object FileReader {
+
   /**
    * Creates a new [[FileReader]] instance with the given file path.
    * @param filePath

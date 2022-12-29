@@ -10,6 +10,7 @@ import fr.esgi.al.funprog.domain.model.{Instruction, Orientation, Position}
  * @param instructions a list of [[Instruction]] objects representing the instructions to be executed by the lawnmower
  */
 case class LawnMower(lawn: Lawn, instructions: List[Instruction]) {
+
   /**
    * Executes the instructions on the lawn.
    *
@@ -17,4 +18,3 @@ case class LawnMower(lawn: Lawn, instructions: List[Instruction]) {
    */
   def run: (Orientation, Position) = LawnMowerService(lawn, instructions).run
 }
-

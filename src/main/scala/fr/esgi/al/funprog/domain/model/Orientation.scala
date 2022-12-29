@@ -74,6 +74,19 @@ case object West extends Orientation {
 }
 
 /**
+ * [[Orientation]] representing the direction `None`.
+ */
+case object OrientationNone extends Orientation {
+  override def turnRight: Orientation = OrientationNone
+
+  override def turnLeft: Orientation = OrientationNone
+
+  override def forward: Position = Position(0, 0)
+
+  override def toString: String = "None"
+}
+
+/**
 Companion object for the [[Orientation]] class, providing a method to create an [[Orientation]]
 from a string representation.
  */
@@ -90,6 +103,6 @@ object Orientation {
     case "E" => East
     case "S" => South
     case "W" => West
-    case _   => println("Ooops ! Invalid orientation"); North
+    case _   => println("Ooops ! Invalid orientation"); OrientationNone
   }
 }

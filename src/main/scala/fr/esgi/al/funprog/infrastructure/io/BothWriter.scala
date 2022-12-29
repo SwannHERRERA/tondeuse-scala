@@ -7,7 +7,8 @@ import fr.esgi.al.funprog.domain.io.Writer
  * It takes a [[FileWriter]] instance and a [[ConsoleWriter]] instance in its constructor.
  * When its write method is called, it writes the given content to both the file and the console.
  */
-class BothWriter(fileWriter: FileWriter, consoleWriter: ConsoleWriter) extends Writer {
+class BothWriter(fileWriter: FileWriter, consoleWriter: ConsoleWriter)
+    extends Writer {
 
   /**
    * Overrides the write method of the [[Writer]] trait.
@@ -39,4 +40,3 @@ object BothWriter {
   def apply(filePath: String): BothWriter =
     new BothWriter(FileWriter(filePath), ConsoleWriter())
 }
-

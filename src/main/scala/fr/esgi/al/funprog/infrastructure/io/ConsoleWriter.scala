@@ -6,6 +6,7 @@ import fr.esgi.al.funprog.domain.io.Writer
  * A [[Writer]] that prints the content to the console.
  */
 case class ConsoleWriter() extends Writer {
+
   /**
    * Writes the given content to the console.
    *
@@ -20,6 +21,7 @@ case class ConsoleWriter() extends Writer {
  * Companion object for [[ConsoleWriter]].
  */
 object ConsoleWriter {
+
   /**
    * Creates a new instance of [[ConsoleWriter]].
    *
