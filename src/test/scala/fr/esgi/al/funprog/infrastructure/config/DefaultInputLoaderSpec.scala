@@ -1,9 +1,10 @@
 package fr.esgi.al.funprog.infrastructure.config
 
-import fr.esgi.al.funprog.application.exception.DonneesIncorectesException
 import fr.esgi.al.funprog.application.model.Lawn
 import fr.esgi.al.funprog.domain.model.{Instruction, Orientation, Position}
 import org.scalatest.funsuite.AnyFunSuite
+
+import scala.util.{Failure, Success}
 
 class DefaultInputLoaderSpec extends AnyFunSuite {
   test(
@@ -47,11 +48,14 @@ class DefaultInputLoaderSpec extends AnyFunSuite {
         )
       )
     )
-    assert(DefaultInputLoader().loadData(input) == expectedOutput)
+    DefaultInputLoader().loadData(input) match {
+      case Success(output) => assert(output == expectedOutput)
+      case _               => fail()
+    }
   }
 
   test(
-    "loadData should throw DonneesIncorectesException if input string is in wrong format"
+    "loadData should fail with DonneesIncorectesException if input string is in wrong format"
   ) {
     val input =
       """5
@@ -59,8 +63,10 @@ class DefaultInputLoaderSpec extends AnyFunSuite {
         |GAGAGAGAA
         |3 3 E
         |AADAADADDA""".stripMargin
-    assertThrows[DonneesIncorectesException] {
-      DefaultInputLoader().loadData(input)
+    DefaultInputLoader().loadData(input) match {
+      case Success(_) => fail()
+      case Failure(exception) =>
+        assert(exception.getMessage == "Données de limite incorrectes")
     }
   }
 
@@ -107,11 +113,14 @@ class DefaultInputLoaderSpec extends AnyFunSuite {
       )
     )
 
-    assert(DefaultInputLoader().loadData(input) == expectedOutput)
+    DefaultInputLoader().loadData(input) match {
+      case Success(output) => assert(output == expectedOutput)
+      case _               => fail()
+    }
   }
 
   test(
-    "loadData should throw DonneesIncorectesException if input string contains invalid data"
+    "loadData should fail with DonneesIncorectesException if input string contains invalid data"
   ) {
     val input =
       """5 5
@@ -119,13 +128,15 @@ class DefaultInputLoaderSpec extends AnyFunSuite {
         |GAGAGAGAA
         |3 3 E
         |AADAADADDA""".stripMargin
-    assertThrows[DonneesIncorectesException] {
-      DefaultInputLoader().loadData(input)
+    DefaultInputLoader().loadData(input) match {
+      case Success(_) => fail()
+      case Failure(exception) =>
+        assert(exception.getMessage == "Orientation incorrecte : Z")
     }
   }
 
   test(
-    "loadData should throw DonneesIncorectesException if there are more instructions than lawns"
+    "loadData should fail with DonneesIncorectesException if there are more instructions than lawns"
   ) {
     val input =
       """5 5
@@ -136,13 +147,15 @@ class DefaultInputLoaderSpec extends AnyFunSuite {
         |0 0 N
         |AA
         |ADGGAAAGA""".stripMargin
-    assertThrows[DonneesIncorectesException] {
-      DefaultInputLoader().loadData(input)
+    DefaultInputLoader().loadData(input) match {
+      case Success(_) => fail()
+      case Failure(exception) =>
+        assert(exception.getMessage == "Données de position incorrectes")
     }
   }
 
   test(
-    "loadData should throw DonneesIncorectesException if there are more lawns than instructions"
+    "loadData should fail with DonneesIncorectesException if there are more lawns than instructions"
   ) {
     val input =
       """5 5
@@ -151,13 +164,15 @@ class DefaultInputLoaderSpec extends AnyFunSuite {
         |3 3 E
         |AADAADADDA
         |0 0 N""".stripMargin
-    assertThrows[DonneesIncorectesException] {
-      DefaultInputLoader().loadData(input)
+    DefaultInputLoader().loadData(input) match {
+      case Success(_) => fail()
+      case Failure(exception) =>
+        assert(exception.getMessage == "Le nombre de tondeuses est différent du nombre d'instructions.")
     }
   }
 
   test(
-    "loadData should throw DonneesIncorectesException if there upperRight position is not valid"
+    "loadData should fail with DonneesIncorectesException if there upperRight position is not valid"
   ) {
     val input =
       """-1 5
@@ -165,13 +180,15 @@ class DefaultInputLoaderSpec extends AnyFunSuite {
         |GAGAGAGAA
         |3 3 E
         |AADAADADDA""".stripMargin
-    assertThrows[DonneesIncorectesException] {
-      DefaultInputLoader().loadData(input)
+    DefaultInputLoader().loadData(input) match {
+      case Success(_) => fail()
+      case Failure(exception) =>
+        assert(exception.getMessage == "Les coordonnées du coin supérieur droit doivent être positives.")
     }
   }
 
   test(
-    "loadData should throw DonneesIncorectesException for position out of bounds"
+    "loadData should fail with DonneesIncorectesException for position out of bounds"
   ) {
     val input =
       """5 5
@@ -181,8 +198,10 @@ class DefaultInputLoaderSpec extends AnyFunSuite {
         |AADAADADDA
       """.stripMargin
 
-    assertThrows[DonneesIncorectesException] {
-      DefaultInputLoader().loadData(input)
+    DefaultInputLoader().loadData(input) match {
+      case Success(_) => fail()
+      case Failure(exception) =>
+        assert(exception.getMessage == "Position incorrecte : Position(6,2)")
     }
   }
 }
