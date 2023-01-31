@@ -131,7 +131,7 @@ class DefaultInputLoaderSpec extends AnyFunSuite {
     DefaultInputLoader().loadData(input) match {
       case Success(_) => fail()
       case Failure(exception) =>
-        assert(exception.getMessage == "Orientation incorrecte : Z")
+        assert(exception.getMessage == "Orientation incorrecte: Z")
     }
   }
 
@@ -167,7 +167,9 @@ class DefaultInputLoaderSpec extends AnyFunSuite {
     DefaultInputLoader().loadData(input) match {
       case Success(_) => fail()
       case Failure(exception) =>
-        assert(exception.getMessage == "Le nombre de tondeuses est différent du nombre d'instructions.")
+        assert(
+          exception.getMessage == "Le nombre de tondeuses est différent du nombre d'instructions."
+        )
     }
   }
 
@@ -183,7 +185,9 @@ class DefaultInputLoaderSpec extends AnyFunSuite {
     DefaultInputLoader().loadData(input) match {
       case Success(_) => fail()
       case Failure(exception) =>
-        assert(exception.getMessage == "Les coordonnées du coin supérieur droit doivent être positives.")
+        assert(
+          exception.getMessage == "Les coordonnées du coin supérieur droit doivent être positives."
+        )
     }
   }
 
