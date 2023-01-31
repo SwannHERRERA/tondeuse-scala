@@ -8,6 +8,8 @@ import fr.esgi.al.funprog.domain.io.{FunProgLawnExporter, Reader, Writer}
 import fr.esgi.al.funprog.infrastructure.config.{AppConfig, DefaultInputLoader}
 import fr.esgi.al.funprog.infrastructure.io._
 
+import scala.util.{Failure, Success, Try}
+
 /**
  * The [[Cli]] class is responsible for running the application.
  * It reads input, processes it, and exports the output in various formats.
@@ -19,86 +21,94 @@ class Cli(appConfig: AppConfig) {
    * Creates a [[Reader]] based on the input mode specified in the AppConfig.
    *
    * @param config the AppConfig containing the input mode
-   * @throws DonneesIncorectesException if the input mode is invalid
-   * @return a [[Reader]] for reading input
+   * @return a [[Reader]] for reading input wrapped in a [[Try]]
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Throw"))
-  @throws[DonneesIncorectesException]
-  private def getReader(config: AppConfig): Reader = config.inputMode match {
-    case "file"    => FileReader(config.inputFile)
-    case "console" => ConsoleReader()
-    case _         => throw DonneesIncorectesException("Invalid input mode")
-  }
+  private def getReader(config: AppConfig): Try[Reader] =
+    config.inputMode match {
+      case "file"    => Success(FileReader(config.inputFile))
+      case "console" => Success(ConsoleReader())
+      case _         => Failure(DonneesIncorectesException("Invalid input mode"))
+    }
 
   /**
    * Creates a [[Writer]] for writing JSON output based on the output mode specified in the AppConfig.
    *
    * @param config the AppConfig containing the output mode
-   * @throws DonneesIncorectesException if the output mode is invalid
-   * @return a [[Writer]] for writing JSON output
+   * @return a [[Writer]] for writing JSON output wrapped in a [[Try]]
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Throw"))
-  @throws[DonneesIncorectesException]
-  private def getJsonWriter(config: AppConfig): Writer =
+  private def getJsonWriter(config: AppConfig): Try[Writer] =
     config.outputMode match {
-      case "file"    => FileWriter(config.outputJsonFile)
-      case "console" => ConsoleWriter()
-      case "both"    => BothWriter(config.outputJsonFile)
-      case _         => throw DonneesIncorectesException("Invalid output mode")
+      case "file"    => Success(FileWriter(config.outputJsonFile))
+      case "console" => Success(ConsoleWriter())
+      case "both"    => Success(BothWriter(config.outputJsonFile))
+      case _         => Failure(DonneesIncorectesException("Invalid output mode"))
     }
 
   /**
    * Creates a [[Writer]] for writing YAML output based on the output mode specified in the AppConfig.
    *
    * @param config the AppConfig containing the output mode
-   * @throws DonneesIncorectesException if the output mode is invalid
-   * @return a [[Writer]] for writing YAML output
+   * @return a [[Writer]] for writing YAML output wrapped in a [[Try]]
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Throw"))
-  @throws[DonneesIncorectesException]
-  private def getYamlWriter(config: AppConfig): Writer =
+  private def getYamlWriter(config: AppConfig): Try[Writer] =
     config.outputMode match {
-      case "file"    => FileWriter(config.outputYamlFile)
-      case "console" => ConsoleWriter()
-      case "both"    => BothWriter(config.outputYamlFile)
-      case _         => throw DonneesIncorectesException("Invalid output mode")
+      case "file"    => Success(FileWriter(config.outputYamlFile))
+      case "console" => Success(ConsoleWriter())
+      case "both"    => Success(BothWriter(config.outputYamlFile))
+      case _         => Failure(DonneesIncorectesException("Invalid output mode"))
     }
 
   /**
    * Creates a [[Writer]] for writing CSV output based on the output mode specified in the AppConfig.
    *
    * @param config the AppConfig containing the output mode
-   * @throws DonneesIncorectesException if the output mode is invalid
-   * @return a [[Writer]] for writing CSV output
+   * @return a [[Writer]] for writing CSV output wrapped in a [[Try]]
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Throw"))
-  @throws[DonneesIncorectesException]
-  private def getCsvWriter(config: AppConfig): Writer =
+  private def getCsvWriter(config: AppConfig): Try[Writer] =
     config.outputMode match {
-      case "file"    => FileWriter(config.outputCsvFile)
-      case "console" => ConsoleWriter()
-      case "both"    => BothWriter(config.outputCsvFile)
-      case _         => throw DonneesIncorectesException("Invalid output mode")
+      case "file"    => Success(FileWriter(config.outputCsvFile))
+      case "console" => Success(ConsoleWriter())
+      case "both"    => Success(BothWriter(config.outputCsvFile))
+      case _         => Failure(DonneesIncorectesException("Invalid output mode"))
     }
 
   /**
    * Runs the application.
    * Reads input, processes it, and exports the output in various formats.
+   * @throws DonneesIncorectesException if something goes wrong while reading inputs
    */
+  @SuppressWarnings(Array("org.wartremover.warts.Throw"))
+  @throws[DonneesIncorectesException]
   def run(): Unit = {
     println(appConfig.name + "\n" + "-" * appConfig.name.length)
 
-    val reader = getReader(appConfig)
+    val reader = getReader(appConfig) match {
+      case Success(r) => r
+      case Failure(e) => throw e
+    }
 
     val exporters = List[FunProgLawnExporter](
-      JsonExporter(getJsonWriter(appConfig)),
-      YamlExporter(getYamlWriter(appConfig)),
-      CsvExporter(getCsvWriter(appConfig))
+      JsonExporter(getJsonWriter(appConfig) match {
+        case Success(r) => r
+        case Failure(e) => throw e
+      }),
+      YamlExporter(getYamlWriter(appConfig) match {
+        case Success(r) => r
+        case Failure(e) => throw e
+      }),
+      CsvExporter(getCsvWriter(appConfig) match {
+        case Success(r) => r
+        case Failure(e) => throw e
+      })
     )
 
     val inputLoader: InputLoader = DefaultInputLoader()
 
-    val (upperRight, lawns, instructions) = inputLoader.loadData(reader.readAll)
+    val (upperRight, lawns, instructions) =
+      inputLoader.loadData(reader.readAll) match {
+        case Success(data) => data
+        case Failure(e)    => throw e
+      }
 
     val lawnService = LawnService(upperRight, lawns, instructions)
 
