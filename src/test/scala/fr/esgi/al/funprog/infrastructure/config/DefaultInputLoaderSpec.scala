@@ -8,6 +8,12 @@ import scala.util.{Failure, Success}
 
 class DefaultInputLoaderSpec extends AnyFunSuite {
   test(
+    "DefaultInputLoader should instanciate successfully"
+  ) {
+    DefaultInputLoader()
+  }
+
+  test(
     "loadData should extract upper right corner position, lawns and instructions from input string"
   ) {
     val input =
@@ -186,7 +192,7 @@ class DefaultInputLoaderSpec extends AnyFunSuite {
       case Success(_) => fail()
       case Failure(exception) =>
         assert(
-          exception.getMessage == "Les coordonnées du coin supérieur droit doivent être positives."
+          exception.getMessage == "Données de limite incorrectes"
         )
     }
   }
@@ -206,6 +212,53 @@ class DefaultInputLoaderSpec extends AnyFunSuite {
       case Success(_) => fail()
       case Failure(exception) =>
         assert(exception.getMessage == "Position incorrecte : Position(6,2)")
+    }
+  }
+
+  test(
+    "loadData should fail with DonneesIncorectesException for incorrect instruction"
+  ) {
+    val input =
+      """5 5
+        |3 3 N
+        |GAGAGAGAA
+        |3 3 E
+        |AADAADABDA
+      """.stripMargin
+
+    DefaultInputLoader().loadData(input) match {
+      case Success(_) => fail()
+      case Failure(exception) =>
+        assert(exception.getMessage == "Instruction incorrecte : B")
+    }
+  }
+
+  test(
+    "loadData should fail with DonneesIncorectesException if no instructions are provided"
+  ) {
+    val input =
+      """5 5
+        |3 3 N
+      """.stripMargin
+
+    DefaultInputLoader().loadData(input) match {
+      case Success(_) => fail()
+      case Failure(exception) =>
+        assert(exception.getMessage == "Le nombre de tondeuses est différent du nombre d'instructions.")
+    }
+  }
+  test(
+    "loadData should fail with DonneesIncorectesException if no input are provided"
+  ) {
+    val input =
+      """
+
+      """.stripMargin
+
+    DefaultInputLoader().loadData(input) match {
+      case Success(_) => fail()
+      case Failure(exception) =>
+        assert(exception.getMessage == "Invalid input file")
     }
   }
 }
