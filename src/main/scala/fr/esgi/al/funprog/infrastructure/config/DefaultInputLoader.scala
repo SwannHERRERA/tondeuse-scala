@@ -24,41 +24,30 @@ case class DefaultInputLoader() extends InputLoader {
     val firstLine = lines.headOption
 
     // Extract upper right corner position from first line
-    val upperRightTry: Try[Position] = extractUpperRight(firstLine)
+    val upperRightTry = extractUpperRight(firstLine)
 
-    upperRightTry match {
-      case Success(upperRight) =>
-        // Extract instructions from lines
-        val instructionsTry: Try[List[List[Instruction]]] = extractInstructions(
-          lines
-        )
-
-        instructionsTry match {
-          case Success(instructions) =>
-            // Extract lawns from lines
-            val lawnsTry: Try[List[Lawn]] = extractLawns(lines, upperRight)
-
-            lawnsTry match {
-              case Success(lawns) if lawns.length != instructions.length =>
-                Failure(
-                  DonneesIncorectesException(
-                    "Le nombre de tondeuses est différent du nombre d'instructions."
-                  )
-                )
-              case Success(lawns)     => Success((upperRight, lawns, instructions))
-              case Failure(exception) => Failure(exception)
-            }
-          case Failure(exception) => Failure(exception)
-        }
-      case Failure(exception) => Failure(exception)
-    }
+    (for {
+      upperRight   <- upperRightTry
+      instructions <- extractInstructions(lines)
+      lawns        <- extractLawns(lines, upperRight)
+      if lawns.length == instructions.length
+    } yield (upperRight, lawns, instructions))
+      .recoverWith {
+        case err: DonneesIncorectesException => Failure(err)
+        case _ =>
+          Failure(
+            DonneesIncorectesException(
+              "Le nombre de tondeuses est différent du nombre d'instructions."
+            )
+          )
+      }
   }
 
   /**
    * Extracts the instructions from the input lines.
    *
    * @param lines the input lines
-   * @return a list of lists of Instruction objects
+   * @return a list of lists of Instruction objects wrapped in a Try
    */
   private def extractInstructions(
       lines: List[String]
@@ -72,25 +61,26 @@ case class DefaultInputLoader() extends InputLoader {
           line.toList
             .map(
               instruction =>
-                assertAuthorizedInstruction(instruction) match {
-                  case Success(_)         => Success(Instruction(instruction))
-                  case Failure(exception) => Failure(exception)
-                }
+                for {
+                  _ <- assertAuthorizedInstruction(instruction)
+                } yield Instruction(instruction)
             )
-            .foldRight(Success(List.empty[Instruction]): Try[List[Instruction]]) {
-              case (Success(instruction), Success(instructions)) =>
-                Success(instruction :: instructions)
-              case (Success(_), Failure(exception)) => Failure(exception)
-              case (Failure(exception), _)          => Failure(exception)
+            .foldLeft(Success(List.empty[Instruction]): Try[List[Instruction]]) {
+              case (tryInstructions, tryInstruction) =>
+                for {
+                  instructions <- tryInstructions
+                  instruction  <- tryInstruction
+                } yield instructions :+ instruction
             }
       }
-      .foldRight(
+      .foldLeft(
         Success(List.empty[List[Instruction]]): Try[List[List[Instruction]]]
       ) {
-        case (Success(instruction), Success(instructions)) =>
-          Success(instruction :: instructions)
-        case (Success(_), Failure(exception)) => Failure(exception)
-        case (Failure(exception), _)          => Failure(exception)
+        case (tryInstructions, tryInstruction) =>
+          for {
+            instructions <- tryInstructions
+            instruction  <- tryInstruction
+          } yield instructions :+ instruction
       }
   }
 
@@ -113,32 +103,29 @@ case class DefaultInputLoader() extends InputLoader {
         case (line, _) =>
           line.split(' ').toList match {
             case x :: y :: orientation :: Nil =>
-              val position = Position(x.toInt, y.toInt)
-              assertPositionInLawn(position, upperRight) match {
-                case Success(_) =>
-                  assertAuthorizedOrientation(orientation) match {
-                    case Success(_) =>
-                      Success(
-                        Lawn(
-                          upperRight,
-                          Orientation(orientation),
-                          Position(x.toInt, y.toInt)
-                        )
-                      )
-                    case Failure(exception) => Failure(exception)
-                  }
-                case Failure(exception) => Failure(exception)
-              }
+              for {
+                _ <- assertPositionInLawn(
+                  Position(x.toInt, y.toInt),
+                  upperRight
+                )
+                _ <- assertAuthorizedOrientation(orientation)
+              } yield Lawn(
+                upperRight,
+                Orientation(orientation),
+                Position(x.toInt, y.toInt)
+              )
             case _ =>
               Failure(
                 DonneesIncorectesException("Données de position incorrectes")
               )
           }
       }
-      .foldRight(Success(List.empty[Lawn]): Try[List[Lawn]]) {
-        case (Success(lawn), Success(lawns))  => Success(lawn :: lawns)
-        case (Success(_), Failure(exception)) => Failure(exception)
-        case (Failure(exception), _)          => Failure(exception)
+      .foldLeft(Success(List.empty[Lawn]): Try[List[Lawn]]) {
+        case (tryLawns, tryLawn) =>
+          for {
+            lawns <- tryLawns
+            lawn  <- tryLawn
+          } yield lawns :+ lawn
       }
   }
 
@@ -151,16 +138,9 @@ case class DefaultInputLoader() extends InputLoader {
   private def extractUpperRight(firstLine: Option[String]): Try[Position] = {
     firstLine match {
       case Some(line) =>
-        line.split(' ').toList match {
-          case x :: y :: Nil =>
-            if (x.toInt < 0 || y.toInt < 0)
-              Failure(
-                DonneesIncorectesException(
-                  "Les coordonnées du coin supérieur droit doivent être positives."
-                )
-              )
-            else
-              Success(Position(x.toInt, y.toInt))
+        line.split(' ') match {
+          case Array(x, y) if x.toInt >= 0 && y.toInt >= 0 =>
+            Success(Position(x.toInt, y.toInt))
           case _ =>
             Failure(DonneesIncorectesException("Données de limite incorrectes"))
         }
@@ -178,9 +158,9 @@ case class DefaultInputLoader() extends InputLoader {
     val lines = data
       .split('\n')
       .map { str =>
-        str.trim
+        str.stripTrailing()
       }
-      .filter(str => str.nonEmpty)
+      .filter(_.nonEmpty)
       .toList
     lines
   }
@@ -208,11 +188,13 @@ case class DefaultInputLoader() extends InputLoader {
    * @param orientation a string representing the orientation to be checked
    */
   private def assertAuthorizedOrientation(orientation: String): Try[Unit] =
-    if (List("N", "S", "E", "W").contains(orientation)) Success(())
-    else
-      Failure(
-        DonneesIncorectesException(s"Orientation incorrecte: $orientation")
-      )
+    orientation match {
+      case "N" | "S" | "E" | "W" => Success(())
+      case _ =>
+        Failure(
+          DonneesIncorectesException(s"Orientation incorrecte: $orientation")
+        )
+    }
 
   /**
    * Assert position is in the lawn.
